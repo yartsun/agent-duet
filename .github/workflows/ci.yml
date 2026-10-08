@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        python: ["3.10", "3.13"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10.2.0
+        with:
+          python-version: ${{ matrix.python }}
+          enable-cache: false
+      - name: Lint
+        run: uvx ruff check .
+      - name: Test
+        run: uv run --no-project --with pytest pytest -q
+      - name: End-to-end demo with fake agents
+        run: uv run --no-project python examples/demo.py
